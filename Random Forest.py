@@ -31,3 +31,20 @@ df['Churn_Probability'] = rf_model.predict_proba(X)[:, 1]
 # 7. 匯出最終結果
 df.to_csv(r'C:\python projects\bustabit\prediction_results.csv', index=False, encoding='utf-8-sig')
 print("\n預測完成！請查看 final_prediction_results.csv")
+
+#1. 混淆矩陣到底在看什麼？
+#classification_report 給你的是最終得分（分數），而 confusion_matrix 給你的是**「犯錯的細節」**。
+
+#它會把結果拆解成四個象限：
+
+#True Positive (TP): 成功抓到要流失的人（英雄）。
+
+#True Negative (TN): 正確判斷留下來的人（穩健）。
+
+#False Positive (FP): 「誤報」，人家明明沒要走，你卻說他要流失（浪費行銷成本）。
+
+#False Negative (FN): 「漏抓」，人家要走了你卻沒發現（最痛的損失）。
+
+#我透過混淆矩陣發現誤報（FP）有 50 人，漏抓（FN）有 10 人。假設挽回一個人的成本是 100 元，但失去一個人的價值是 1000 元，我能算出這個模型幫公司省下了多少錢。
+
+#加入from matplotlib.colors import ListedColormap
