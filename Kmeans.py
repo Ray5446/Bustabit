@@ -1,35 +1,27 @@
-import pandas as pd
 from sklearn.cluster import KMeans
+import pandas as pd
 
-# 1. 讀取資料
-df = pd.read_csv(r'C:\python projects\bustabit\Dim_users.csv') 
+# 1. 讀取特徵表
+features = pd.read_csv(r'C:\python projects\bustabit\processed_features.csv')
 
-# 2. RFM 等級分類 (1-5 分)
-df['R_Rank'] = pd.qcut(df['Recency'], 5, labels=[5, 4, 3, 2, 1])
-df['F_Rank'] = pd.qcut(df['Frequency'].rank(method='first'), 5, labels=[1, 2, 3, 4, 5])
-df['M_Rank'] = pd.qcut(df['Monetary'], 5, labels=[1, 2, 3, 4, 5])
+# 2. 選擇分群用的特徵 (建議用 Rank，因為數值已經標準化在 1-5 之間)
+cluster_features = features[['R_Rank', 'F_Rank', 'M_Rank']]
 
-# 3. 準備模型輸入資料
-X = df[['R_Rank', 'F_Rank', 'M_Rank']]
+# 3. 執行 K-Means (設定分為 4 群)
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
+features['Cluster'] = kmeans.fit_predict(cluster_features)
 
-# 4. 執行 K-Means
-kmeans = KMeans(n_clusters=4, init='k-means++', random_state=42, n_init=10)
-df['Cluster'] = kmeans.fit_predict(X)
+# 4. 查看每一群的 RFM 平均值，用來定義群體名稱
+cluster_summary = features.groupby('Cluster').agg({
+    'Recency': 'mean',
+    'Frequency': 'mean',
+    'Monetary': 'mean',
+    'Win_Rate': 'mean',
+    'Churn': 'mean',
+    'Username': 'count'
+}).rename(columns={'Username': 'Player_Count'})
 
-# 5. 查看結果
-print("--- 前 5 筆分群結果 ---")
-print(df[['Username', 'R_Rank', 'F_Rank', 'M_Rank', 'Cluster']].head())
+# 5. 匯出成 CSV
+features.to_csv(r'C:\python projects\bustabit\clusters.csv', index=False, encoding='utf-8-sig')
 
-# 6. 分析每一群的特徵 (修正關鍵：先將欄位轉為 float)
-print("\n--- 各分群平均等級 (1-5 分) ---")
-# 指定需要計算的欄位
-target_cols = ['R_Rank', 'F_Rank', 'M_Rank']
-# 先轉型，再 groupby 算平均
-cluster_summary = df.copy()
-cluster_summary[target_cols] = cluster_summary[target_cols].astype(float)
-analysis = cluster_summary.groupby('Cluster')[target_cols].mean()
-print(analysis)
-
-# 7. 儲存結果 (加上 utf-8-sig 確保中文與 Excel 相容)
-df.to_csv(r'C:\python projects\bustabit\KMeans_Results.csv', index=False, encoding='utf-8-sig')
-print("\n分群成功！結果已存入 KMeans_Results.csv")
+print("\n分群完成！已匯出至 processed_features_with_clusters.csv")
