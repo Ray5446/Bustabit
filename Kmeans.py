@@ -1,27 +1,40 @@
-from sklearn.cluster import KMeans
 import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
 
-# 1. 讀取特徵表
-features = pd.read_csv(r'C:\python projects\bustabit\processed_features.csv')
+features = pd.read_csv(r'H:\python projects\bustabit\processed_features.csv')
 
-# 2. 選擇分群用的特徵 (建議用 Rank，因為數值已經標準化在 1-5 之間)
 cluster_features = features[['R_Rank', 'F_Rank', 'M_Rank']]
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(cluster_features)
 
-# 3. 執行 K-Means (設定分為 4 群)
+sse = []
+k_range = range(1, 11) 
+
+for k in k_range:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(scaled_features)
+    sse.append(kmeans.inertia_)
+
+plt.figure(figsize=(8, 5))
+plt.plot(k_range, sse, 'bx-', markersize=8)
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('SSE (Inertia)')
+plt.title('Elbow Method For Optimal k')
+plt.xticks(k_range)
+plt.grid(True)
+plt.show()
+
+
 kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
-features['Cluster'] = kmeans.fit_predict(cluster_features)
+features['Cluster'] = kmeans.fit_predict(scaled_features)
 
-# 4. 查看每一群的 RFM 平均值，用來定義群體名稱
-cluster_summary = features.groupby('Cluster').agg({
-    'Recency': 'mean',
-    'Frequency': 'mean',
-    'Monetary': 'mean',
-    'Win_Rate': 'mean',
-    'Churn': 'mean',
-    'Username': 'count'
-}).rename(columns={'Username': 'Player_Count'})
+score = silhouette_score(scaled_features, features['Cluster'])
 
-# 5. 匯出成 CSV
+print(f"\n--- 分群驗證報告 ---")
+print(f"樣本總數: {len(features)}")
+print(f"分群輪廓分數 (k=4): {score:.4f}")
+
 features.to_csv(r'C:\python projects\bustabit\clusters.csv', index=False, encoding='utf-8-sig')
-
-print("\n分群完成！已匯出至 processed_features_with_clusters.csv")
