@@ -1,9 +1,9 @@
 # Bustabit 玩家行為與流失率分析
 > **基於 RFM 模型與隨機森林演算法的數據研究**
 
-![Pandas](https://img.shields.io/badge/Library-Pandas-150458?style=flat&logo=pandas&logoColor=white)
-![Machine Learning](https://img.shields.io/badge/Skill-Machine%20Learning-2ecc71?style=flat&logo=scikit-learn&logoColor=white)
-![Power BI](https://img.shields.io/badge/Visualization-Power%20BI-F2C811?style=flat&logo=power-bi&logoColor=black)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-2ecc71?style=flat&logo=scikit-learn&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=flat&logo=power-bi&logoColor=black)
 
 ## 📌 專案概述
 本專案針對線上博弈平台 **Bustabit** 的 50,000 筆下注紀錄進行深度挖掘。旨在解決博弈產業中「玩家易流失」的痛點，透過建立**流失預警模型**，在玩家離開前識別風險，協助營運團隊優化並制定留存策略。
